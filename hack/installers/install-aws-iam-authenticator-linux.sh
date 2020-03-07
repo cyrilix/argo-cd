@@ -1,8 +1,23 @@
 #!/bin/bash
 set -eux -o pipefail
+TARGETPLATFORM=$1
+
+if [[ -z "${TARGETPLATFORM}" ]]
+then
+  TARGETPLATFORM="linux/amd64"
+fi
+
+OS=$(echo $TARGETPLATFORM | cut -f1 -d/)
+ARCH=$(echo $TARGETPLATFORM | cut -f2 -d/)
+ARM=$(echo $TARGETPLATFORM | cut -f3 -d/ | sed "s/v//" )
 
 AWS_IAM_AUTHENTICATOR_VERSION=0.4.0-alpha.1
-[ -e $DOWNLOADS/aws-iam-authenticator ] || curl -sLf --retry 3 -o $DOWNLOADS/aws-iam-authenticator https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/download/${AWS_IAM_AUTHENTICATOR_VERSION}/aws-iam-authenticator_${AWS_IAM_AUTHENTICATOR_VERSION}_linux_amd64
-cp $DOWNLOADS/aws-iam-authenticator $BIN/
+
+git clone https://github.com/kubernetes-sigs/aws-iam-authenticator.git
+cd aws-iam-authenticator
+git checkout "${AWS_IAM_AUTHENTICATOR_VERSION}"
+GO111MODULE=on GOARCH=${ARCH} GOOS=${OS} GOARM=${ARM} go build ./cmd/aws-iam-authenticator
+
+mv aws-iam-authenticator $BIN
 chmod +x $BIN/aws-iam-authenticator
 aws-iam-authenticator version

@@ -6,6 +6,4 @@ export BIN=${BIN:-/usr/local/bin}
 
 mkdir -p $DOWNLOADS
 
-for product in $*; do
-  "$(dirname $0)/installers/install-${product}.sh"
-done
+"$(dirname $0)/installers/install-$1.sh" $2

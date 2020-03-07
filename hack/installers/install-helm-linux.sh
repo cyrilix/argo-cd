@@ -1,7 +1,19 @@
 #!/bin/bash
 set -eux -o pipefail
 
-[ -e $DOWNLOADS/helm.tar.gz ] || curl -sLf --retry 3 -o $DOWNLOADS/helm.tar.gz https://storage.googleapis.com/kubernetes-helm/helm-v2.15.2-linux-amd64.tar.gz
+TARGETPLATFORM=$1
+
+if [[ -z "${TARGETPLATFORM}" ]]
+then
+  TARGETPLATFORM="linux/amd64"
+fi
+
+OS=$(echo $TARGETPLATFORM | cut -f1 -d/)
+ARCH=$(echo $TARGETPLATFORM | cut -f2 -d/)
+ARM=$(echo $TARGETPLATFORM | cut -f3 -d/ | sed "s/v//" )
+
+
+[ -e $DOWNLOADS/helm.tar.gz ] || curl -sLf --retry 3 -o $DOWNLOADS/helm.tar.gz https://get.helm.sh/helm-v2.15.2-${OS}-${ARCH}.tar.gz
 tar -C /tmp/ -xf $DOWNLOADS/helm.tar.gz
-cp /tmp/linux-amd64/helm $BIN/helm
+cp /tmp/${OS}-${ARCH}/helm $BIN/helm
 helm version --client
