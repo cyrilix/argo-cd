@@ -6,7 +6,7 @@ ARG BASE_IMAGE=debian:10-slim
 # Initial stage which pulls prepares build dependencies and CLI tooling we need for our final image
 # Also used as the image in CI jobs so needs all dependencies
 ####################################################################################################
-FROM --platform=$BUILDPLATFORM golang:1.14 as builder
+FROM --platform=$BUILDPLATFORM golang:1.14.1 as builder
 
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
@@ -105,7 +105,7 @@ RUN NODE_ENV='production' yarn build
 ####################################################################################################
 # Argo CD Build stage which performs the actual build of Argo CD binaries
 ####################################################################################################
-FROM --platform=$BUILDPLATFORM golang:1.14 as argocd-build
+FROM --platform=$BUILDPLATFORM golang:1.14.1 as argocd-build
 
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
