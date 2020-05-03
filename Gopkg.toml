@@ -128,3 +128,7 @@ required = [
 [[constraint]]
   name = "github.com/bsm/redislock"
   version = "0.4.3"
+
+[[constraint]]
+  name = "github.com/google/go-jsonnet"
+  revision = "e6572f508331de5c4f2b2565595c8d312cfe2dd1"

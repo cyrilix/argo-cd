@@ -530,7 +530,7 @@
   version = "v0.3.1"
 
 [[projects]]
-  digest = "1:ce886a0d7c4737485b1d72453aa6f22282c021fffe209abe33220d54d0e2e670"
+  digest = "1:50685676a9b1f30662fa88ad7770c303329d6005334be50b36607f0e30bb8c36"
   name = "github.com/google/go-jsonnet"
   packages = [
     ".",
@@ -541,8 +541,7 @@
     "internal/program",
   ]
   pruneopts = ""
-  revision = "70a6b3d419d9ee16a144345c35e0305052c6f2d9"
-  version = "v0.15.0"
+  revision = "e6572f508331de5c4f2b2565595c8d312cfe2dd1"
 
 [[projects]]
   branch = "master"
