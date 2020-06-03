@@ -12,7 +12,7 @@ OS=$(echo $TARGETPLATFORM | cut -f1 -d/)
 ARCH=$(echo $TARGETPLATFORM | cut -f2 -d/)
 ARM=$(echo $TARGETPLATFORM | cut -f3 -d/ | sed "s/v//" )
 
-KUSTOMIZE_VERSION=${KUSTOMIZE_VERSION:-3.5.4}
+KUSTOMIZE_VERSION=${KUSTOMIZE_VERSION:-3.6.1}
 
 
 GOPATH=/tmp/go
