@@ -55,26 +55,26 @@ fi
 echo ">> Working in release branch '${RELEASE_BRANCH}'"
 
 # Check for trigger tag existing in local repo
-if git tag -l | grep -q "${TRIGGER_TAG}"; then
+if git tag -l | grep -q -E "^${TRIGGER_TAG}$"; then
 	echo "!! Release tag '${TRIGGER_TAG}' already exists in local repository" >&2
 	exit 1
 fi
 
 # Check for trigger tag existing in remote repo
-if git ls-remote ${GIT_REMOTE} refs/tags/${TRIGGER_TAG} | grep -q ${NEW_TAG}; then
+if git ls-remote ${GIT_REMOTE} refs/tags/${TRIGGER_TAG} | grep -q -E "^${NEW_TAG}$"; then
 	echo "!! Target trigger tag '${TRIGGER_TAG}' already exists in remote '${GIT_REMOTE}'" >&2
 	echo "!! Another operation currently in progress?" >&2
 	exit 1
 fi
 
 # Check for target (version) tag in local repo
-if git tag -l | grep -q "${NEW_TAG}"; then
+if git tag -l | grep -q -E "^${NEW_TAG}$"; then
 	echo "!! Target version tag '${NEW_TAG}' already exists in local repository" >&2
 	exit 1
 fi
 
 # Check for target (version) tag in remote repo
-if git ls-remote ${GIT_REMOTE} refs/tags/${NEW_TAG} | grep -q ${NEW_TAG}; then
+if git ls-remote ${GIT_REMOTE} refs/tags/${NEW_TAG} | grep -q -E "^${NEW_TAG}$"; then
 	echo "!! Target version tag '${NEW_TAG}' already exists in remote '${GIT_REMOTE}'" >&2
 	exit 1
 fi
@@ -92,7 +92,7 @@ fi
 
 # We need different git comment char than '#', because markdown makes extensive
 # use of '#' - we chose ';' for our operation.
-origToken=$(git config core.commentChar)
+origToken=$(git config core.commentChar || echo '#')
 echo ">> Saving original Git comment char '${origToken}' and setting it to ';' for this run"
 if ! git config core.commentChar ';'; then
 	echo "!! Could not set git config commentChar ';'" >&2
