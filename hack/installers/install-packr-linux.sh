@@ -3,6 +3,19 @@ set -eux -o pipefail
 
 . $(dirname $0)/../tool-versions.sh
 
+
+TARGETPLATFORM=$1
+
+if [[ -z "${TARGETPLATFORM}" ]]
+then
+  TARGETPLATFORM="linux/amd64"
+fi
+
+OS=$(echo $TARGETPLATFORM | cut -f1 -d/)
+ARCH=$(echo $TARGETPLATFORM | cut -f2 -d/)
+ARM=$(echo $TARGETPLATFORM | cut -f3 -d/ | sed "s/v//" )
+ARCHITECTURE=${ARCH}
+
 PACKR_VERSION=${packr_version}
 case $ARCHITECTURE in
   arm|arm64)
