@@ -922,8 +922,9 @@ spec:
                 type: object
               type: array
             observedAt:
-              description: ObservedAt indicates when the application state was updated
-                without querying latest git state
+              description: 'ObservedAt indicates when the application state was updated
+                without querying latest git state Deprecated: controller no longer
+                updates ObservedAt field'
               format: date-time
               type: string
             operationState:
@@ -2997,7 +2998,7 @@ spec:
         - "10"
         - --redis
         - argocd-redis-ha-haproxy:6379
-        image: argoproj/argocd:v1.7.2
+        image: argoproj/argocd:v1.7.3
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
@@ -3053,7 +3054,7 @@ spec:
         - -n
         - /usr/local/bin/argocd-util
         - /shared
-        image: argoproj/argocd:v1.7.2
+        image: argoproj/argocd:v1.7.3
         imagePullPolicy: Always
         name: copyutil
         volumeMounts:
@@ -3103,7 +3104,7 @@ spec:
         - argocd-repo-server
         - --redis
         - argocd-redis-ha-haproxy:6379
-        image: argoproj/argocd:v1.7.2
+        image: argoproj/argocd:v1.7.3
         imagePullPolicy: Always
         name: argocd-repo-server
         ports:
@@ -3178,7 +3179,7 @@ spec:
         env:
         - name: ARGOCD_API_SERVER_REPLICAS
           value: "2"
-        image: argoproj/argocd:v1.7.2
+        image: argoproj/argocd:v1.7.3
         imagePullPolicy: Always
         name: argocd-server
         ports:
