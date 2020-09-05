@@ -18,13 +18,14 @@ function optionsToSearch(options?: QueryOptions) {
 }
 
 export class ApplicationsService {
-    public list(projects: string[], options?: QueryOptions): Promise<models.Application[]> {
+    public list(projects: string[], options?: QueryOptions): Promise<models.ApplicationList> {
         return requests
             .get('/applications')
             .query({project: projects, ...optionsToSearch(options)})
             .then(res => res.body as models.ApplicationList)
             .then(list => {
-                return (list.items || []).map(app => this.parseAppFields(app));
+                list.items = (list.items || []).map(app => this.parseAppFields(app));
+                return list;
             });
     }
 
@@ -100,7 +101,7 @@ export class ApplicationsService {
         return requests
             .put(`/applications/${app.metadata.name}`)
             .send(app)
-            .then(res => res.body as models.Application);
+            .then(res => this.parseAppFields(res.body));
     }
 
     public create(app: models.Application): Promise<models.Application> {
@@ -118,10 +119,15 @@ export class ApplicationsService {
             .then(() => true);
     }
 
-    public watch(query?: {name: string}, options?: QueryOptions): Observable<models.ApplicationWatchEvent> {
+    public watch(query?: {name?: string; resourceVersion?: string}, options?: QueryOptions): Observable<models.ApplicationWatchEvent> {
         const search = new URLSearchParams();
         if (query) {
-            search.set('name', query.name);
+            if (query.name) {
+                search.set('name', query.name);
+            }
+            if (query.resourceVersion) {
+                search.set('resourceVersion', query.resourceVersion);
+            }
         }
         if (options) {
             const searchOptions = optionsToSearch(options);
