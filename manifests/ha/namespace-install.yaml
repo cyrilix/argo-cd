@@ -2763,7 +2763,7 @@ spec:
       - command:
         - /shared/argocd-util
         - rundex
-        image: quay.io/dexidp/dex:v2.25.0
+        image: ghcr.io/dexidp/dex:v2.27.0
         imagePullPolicy: Always
         name: dex
         ports:
@@ -2779,7 +2779,7 @@ spec:
         - -n
         - /usr/local/bin/argocd-util
         - /shared
-        image: argoproj/argocd:v1.8.1
+        image: argoproj/argocd:v1.8.2
         imagePullPolicy: Always
         name: copyutil
         volumeMounts:
@@ -2917,17 +2917,25 @@ spec:
         - argocd-repo-server
         - --redis
         - argocd-redis-ha-haproxy:6379
-        image: argoproj/argocd:v1.8.1
+        image: argoproj/argocd:v1.8.2
         imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz?full=true
+            port: 8084
+          initialDelaySeconds: 30
+          periodSeconds: 5
         name: argocd-repo-server
         ports:
         - containerPort: 8081
         - containerPort: 8084
         readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8084
           initialDelaySeconds: 5
           periodSeconds: 10
-          tcpSocket:
-            port: 8081
         volumeMounts:
         - mountPath: /app/config/ssh
           name: ssh-known-hosts
@@ -2991,8 +2999,14 @@ spec:
         env:
         - name: ARGOCD_API_SERVER_REPLICAS
           value: "2"
-        image: argoproj/argocd:v1.8.1
+        image: argoproj/argocd:v1.8.2
         imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /healthz?full=true
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 30
         name: argocd-server
         ports:
         - containerPort: 8080
@@ -3061,7 +3075,7 @@ spec:
         - "10"
         - --redis
         - argocd-redis-ha-haproxy:6379
-        image: argoproj/argocd:v1.8.1
+        image: argoproj/argocd:v1.8.2
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
