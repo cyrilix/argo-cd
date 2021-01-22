@@ -1026,7 +1026,7 @@ func (s *Service) GetAppDetails(ctx context.Context, q *apiclient.RepoServerAppD
 
 	getCached := func(revision string, _ bool) (bool, interface{}, error) {
 		res := &apiclient.RepoAppDetailsResponse{}
-		err := s.cache.GetAppDetails(revision, q.Source, &res)
+		err := s.cache.GetAppDetails(revision, q.Source, res)
 		if err == nil {
 			log.Infof("app details cache hit: %s/%s", revision, q.Source.Path)
 			return true, res, nil
@@ -1277,9 +1277,12 @@ func (s *Service) newClientResolveRevision(repo *v1alpha1.Repository, revision s
 }
 
 func (s *Service) newHelmClientResolveRevision(repo *v1alpha1.Repository, revision string, chart string) (helm.Client, string, error) {
-	helmClient := s.newHelmClient(repo.Repo, repo.GetHelmCreds(), repo.EnableOCI)
+	helmClient := s.newHelmClient(repo.Repo, repo.GetHelmCreds(), repo.EnableOCI || helm.IsHelmOciChart(chart))
 	if helm.IsVersion(revision) {
 		return helmClient, revision, nil
+	}
+	if repo.EnableOCI {
+		return nil, "", errors.New("OCI helm registers don't support semver ranges. Exact revision must be specified.")
 	}
 	constraints, err := semver.NewConstraint(revision)
 	if err != nil {
