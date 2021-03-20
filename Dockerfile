@@ -4,7 +4,10 @@ ARG BASE_IMAGE=ubuntu:20.10
 # Initial stage which pulls prepares build dependencies and CLI tooling we need for our final image
 # Also used as the image in CI jobs so needs all dependencies
 ####################################################################################################
-FROM golang:1.16.2 as builder
+FROM --platform=$BUILDPLATFORM golang:1.16.2 as builder
+
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
 
 RUN echo 'deb http://deb.debian.org/debian buster-backports main' >> /etc/apt/sources.list
 
@@ -27,11 +30,11 @@ ADD hack/install.sh .
 ADD hack/installers installers
 ADD hack/tool-versions.sh .
 
-RUN ./install.sh packr-linux
-RUN ./install.sh ksonnet-linux
-RUN ./install.sh helm2-linux
-RUN ./install.sh helm-linux
-RUN ./install.sh kustomize-linux
+RUN ./install.sh packr-linux "amd64"
+RUN ./install.sh ksonnet-linux ${TARGETPLATFORM}
+RUN ./install.sh helm2-linux ${TARGETPLATFORM}
+RUN ./install.sh helm-linux ${TARGETPLATFORM}
+RUN ./install.sh kustomize-linux ${TARGETPLATFORM}
 
 ####################################################################################################
 # Argo CD Base - used as the base for both the release and dev argocd images
@@ -86,7 +89,10 @@ WORKDIR /home/argocd
 ####################################################################################################
 # Argo CD UI stage
 ####################################################################################################
-FROM node:12.18.4 as argocd-ui
+FROM --platform=$BUILDPLATFORM node:12.18.4 as argocd-ui
+
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
 
 WORKDIR /src
 ADD ["ui/package.json", "ui/yarn.lock", "./"]
@@ -102,7 +108,10 @@ RUN NODE_ENV='production' yarn build
 ####################################################################################################
 # Argo CD Build stage which performs the actual build of Argo CD binaries
 ####################################################################################################
-FROM golang:1.16.0 as argocd-build
+FROM --platform=$BUILDPLATFORM golang:1.16.2 as argocd-build
+
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
 
 COPY --from=builder /usr/local/bin/packr /usr/local/bin/packr
 
@@ -111,13 +120,16 @@ WORKDIR /go/src/github.com/argoproj/argo-cd
 COPY go.mod go.mod
 COPY go.sum go.sum
 
-RUN go mod download
+RUN GOOS=${GOOS} GOARCH=${GOARCH} GOARM=${GOARM} go mod download
 
 # Perform the build
 COPY . .
-RUN make argocd-all
+RUN GOOS=$(echo $TARGETPLATFORM | cut -f1 -d/) && \
+    GOARCH=$(echo $TARGETPLATFORM | cut -f2 -d/) && \
+    GOARM=$(echo $TARGETPLATFORM | cut -f3 -d/ | sed "s/v//" ) && \
+    make GOOS=${GOOS} GOARCH=${GOARCH} GOARM=${GOARM} argocd-all
 
-ARG BUILD_ALL_CLIS=true
+ARG BUILD_ALL_CLIS=false
 RUN if [ "$BUILD_ALL_CLIS" = "true" ] ; then \
     make BIN_NAME=argocd-darwin-amd64 GOOS=darwin argocd-all && \
     make BIN_NAME=argocd-windows-amd64.exe GOOS=windows argocd-all \
