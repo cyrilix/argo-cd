@@ -1,4 +1,4 @@
-PACKAGE=github.com/argoproj/argo-cd/common
+PACKAGE=github.com/argoproj/argo-cd/v2/common
 CURRENT_DIR=$(shell pwd)
 DIST_DIR=${CURRENT_DIR}/dist
 CLI_NAME=argocd
@@ -309,7 +309,7 @@ mod-download: test-tools-image
 
 .PHONY: mod-download-local
 mod-download-local:
-	go mod download
+	go mod download && go mod tidy # go mod download changes go.sum https://github.com/golang/go/issues/42970
 
 .PHONY: mod-vendor
 mod-vendor: test-tools-image
